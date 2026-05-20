@@ -1,10 +1,18 @@
+"""HTTP-triggered Azure Function (single-file layout).
+
+This file exposes a FunctionApp directly (no Blueprint required).
+Registering is handled automatically by the Functions host when deployed.
+"""
+
 import azure.functions as func
 import logging
 
-app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
+# Create the FunctionApp instance used by the Functions host
+app = func.FunctionApp()
 
-@app.route(route="mainscript")
-def mainscript(req: func.HttpRequest) -> func.HttpResponse:
+
+@app.route(route="http_trigger", auth_level=func.AuthLevel.FUNCTION)
+def http_trigger(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed a request.')
 
     name = req.params.get('name')
@@ -12,8 +20,8 @@ def mainscript(req: func.HttpRequest) -> func.HttpResponse:
         try:
             req_body = req.get_json()
         except ValueError:
-            pass
-        else:
+            req_body = None
+        if req_body:
             name = req_body.get('name')
 
     if name:
