@@ -1,24 +1,27 @@
-import azure.functions as func
-import logging
 import json
 import urllib.request
 import pandas as pd
 import numpy as np
-import openpyxl
 import re
 
 #endpoint for uploading 
 ENDPOINT = "https://inpro-participants-submit-3avzbu5vaa-as.a.run.app"
 
 #pathing to file inside onedrive locally:
-path = "C:\\Users\\xuan2\\Downloads\\_CE Fest 2026 Participant Sign-up Form!(1-1).xlsx"
+path = "C:\\Users\\xuan2\\Downloads\\_CE Fest 2026 Participant Sign-up Form!(1-3).xlsx"
+
+fake_db = []
 
 def main():
     renamed_df = rename(mapping, pd.read_excel(path))
-    for _, row in renamed_df.iterrows():
+    filtered = renamed_df[~(renamed_df['PDPA'] == 'I disagree')]
+    for _, row in filtered.iterrows():
         payload = process_row(row)
         #upload_data(payload)
-        print(payload)
+        sim_upload(payload)
+        print(fake_db)
+
+
 
 '''Stuff for renaming'''
 mapping = {"Completion time":"created_at",
@@ -31,7 +34,8 @@ mapping = {"Completion time":"created_at",
             "First Choice ": "trail_first_choice",
             "Second Choice ": "trail_second_choice",
             "Third Choice ": "trail_third_choice",
-            'Why did you select your chosen trails ? (EG: T1 because .....) ': "writeup"}
+            'Why did you select your chosen trails ? (EG: T1 because .....) ': "writeup",
+            '2' : 'PDPA'}
 
 def normalize(s):
     s = '' if s is None else str(s)
@@ -124,6 +128,10 @@ def upload_data(payload : dict): #function to upload data onto firebase (DONT NE
         body = e.read().decode()
         print(f"Status: {e.code}")
         print(f"Error: {body}")
+
+
+def sim_upload(payload : dict):
+    fake_db.append(payload)
 
 
 

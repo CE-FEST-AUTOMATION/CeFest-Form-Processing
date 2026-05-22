@@ -92,7 +92,6 @@ def process_row(srs: pd.Series) -> dict:
         else:
             d[col_name] = srs.get(col_name)
     d = format_vals(d)
-    # normalize numpy / pandas types to Python builtins for JSON
     for k in list(d.keys()):
         d[k] = normalize_value(d[k])
     return d
