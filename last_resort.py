@@ -7,20 +7,25 @@ import re
 #endpoint for uploading 
 ENDPOINT = "https://inpro-participants-submit-3avzbu5vaa-as.a.run.app"
 
-#pathing to file inside onedrive locally:
+#pathing to file on computer 
 path = "C:\\Users\\xuan2\\Downloads\\_CE Fest 2026 Participant Sign-up Form!(1-3).xlsx"
 
+
+'''testing purposes, just ignore'''
 fake_db = []
+
+def sim_upload(payload : dict):
+    fake_db.append(payload)
+'''delete away when actually use'''
 
 def main():
     renamed_df = rename(mapping, pd.read_excel(path))
     filtered = renamed_df[~(renamed_df['PDPA'] == 'I disagree')]
     for _, row in filtered.iterrows():
         payload = process_row(row)
-        #upload_data(payload)
-        sim_upload(payload)
+        #upload_data(payload) #REAL UPLOAD LINE, UNCOMMENT FOR ACTUAL USE
+        sim_upload(payload) # SIMULATED UPLOAD LINE, COMMENT AWAY WHEN ACTUAL USE
         print(fake_db)
-
 
 
 '''Stuff for renaming'''
@@ -128,11 +133,5 @@ def upload_data(payload : dict): #function to upload data onto firebase (DONT NE
         body = e.read().decode()
         print(f"Status: {e.code}")
         print(f"Error: {body}")
-
-
-def sim_upload(payload : dict):
-    fake_db.append(payload)
-
-
 
 main()
