@@ -25,7 +25,8 @@ def main():
         payload = process_row(row)
         #upload_data(payload) #REAL UPLOAD LINE, UNCOMMENT FOR ACTUAL USE
         sim_upload(payload) # SIMULATED UPLOAD LINE, COMMENT AWAY WHEN ACTUAL USE
-        print(fake_db)
+        print (fake_db[0])
+
 
 
 '''Stuff for renaming'''
@@ -135,3 +136,4 @@ def upload_data(payload : dict): #function to upload data onto firebase (DONT NE
         print(f"Error: {body}")
 
 main()
+

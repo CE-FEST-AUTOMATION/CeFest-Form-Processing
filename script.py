@@ -1,21 +1,24 @@
 import json
 import urllib.request
+from datetime import date, datetime
 import pandas as pd
 import numpy as np
 import re
+import openpyxl
 
 #endpoint for uploading 
 ENDPOINT = "https://inpro-participants-submit-3avzbu5vaa-as.a.run.app" #<- CHANGE HERE WHEN USING 
 
 #pathing to file on computer 
-path = "C:\\Users\\xuan2\\Downloads\\_CE Fest 2026 Participant Sign-up Form!(1-3).xlsx" #<- CHANGE HERE WHEN USING 
+path = "C:\\Users\\xuan2\\Downloads\\_CE Fest 2026 Participant Sign-up Form!(1-3) (1).xlsx" #<- CHANGE HERE WHEN USING 
 
 def main():
     renamed_df = rename(mapping, pd.read_excel(path))
     filtered = renamed_df[~(renamed_df['PDPA'] == 'I disagree')] 
     for _, row in filtered.iterrows():
         payload = process_row(row)
-        #upload_data(payload) #REAL UPLOAD LINE, UNCOMMENT FOR ACTUAL USE
+        upload_data(payload) #REAL UPLOAD LINE, UNCOMMENT FOR ACTUAL USE
+    print("done upload")
 
 
 '''Stuff for renaming''' #<- CHANGE HERE based on different form submissions
@@ -72,8 +75,8 @@ def format_vals(init: dict) -> dict:
 def normalize_value(v):
     if pd.isna(v):
         return None
-    if isinstance(v, pd.Timestamp):
-        return v.to_pydatetime()
+    if isinstance(v, (datetime, date, pd.Timestamp)):
+        return v.isoformat()
     if isinstance(v, (np.integer,)):
         return int(v)
     if isinstance(v, (np.floating,)):
