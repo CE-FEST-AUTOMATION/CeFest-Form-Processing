@@ -1,13 +1,32 @@
 import json
+import os
 import urllib.request
+from pathlib import Path
 from datetime import date, datetime
 import pandas as pd
 import numpy as np
 import re
 import openpyxl
 
-#endpoint for uploading 
-ENDPOINT = "https://inpro-participants-submit-3avzbu5vaa-as.a.run.app" #<- CHANGE HERE WHEN USING 
+def load_env_file(env_path: str = ".env") -> None:
+    env_file = Path(env_path)
+    if not env_file.exists():
+        return
+    for line in env_file.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        os.environ.setdefault(key.strip(), value.strip().strip('"').strip("'"))
+
+load_env_file()
+
+
+
+
+ENDPOINT = os.getenv("ENDPOINT") # endpoint for uploading
+if not ENDPOINT:
+    raise ValueError("ENDPOINT is not set. Add it to .env as ENDPOINT=...")
 
 #pathing to file on computer 
 path = "C:\\Users\\xuan2\\Downloads\\_CE Fest 2026 Participant Sign-up Form!(1-3) (1).xlsx" #<- CHANGE HERE WHEN USING 
@@ -19,6 +38,8 @@ def main():
         payload = process_row(row)
         upload_data(payload) #REAL UPLOAD LINE, UNCOMMENT FOR ACTUAL USE
     print("done upload")
+
+
 
 
 '''Stuff for renaming''' #<- CHANGE HERE based on different form submissions
