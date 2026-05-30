@@ -12,7 +12,7 @@ import openpyxl
 def main():
     load_env_file()
     endpoint , path = read_env()
-    renamed_df = rename(mapping, pd.read_excel(path))
+    renamed_df = rename(mapping, pd.read_csv(path)) # <- READS CSV FILE
     for _, row in renamed_df.iterrows():
         payload = process_row(row)
         upload_data(endpoint, payload) #REAL UPLOAD LINE, UNCOMMENT FOR ACTUAL USE
@@ -49,10 +49,10 @@ def read_env():
     endpoint = os.getenv("ENDPOINT") # endpoint for uploading
     if not endpoint:
         raise ValueError("ENDPOINT is not set. Add it to .env as ENDPOINT=...")
-    # path to Excel file on computer — read from .env via `EXCO_PATH`
+    # path to .csv file on computer — read from .env via `EXCO_PATH`
     path = os.getenv("EXCO_PATH")
     if not path:
-        raise ValueError("EXCO_PATH is not set. Add it to .env as EXCO_PATH=C:\\path\\to\\file.xlsx")
+        raise ValueError("EXCO_PATH is not set. Add it to .env as EXCO_PATH=C:\\path\\to\\file.csv")
     return endpoint, path
 
 def normalize(s):
