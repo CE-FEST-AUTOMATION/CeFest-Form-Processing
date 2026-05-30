@@ -71,7 +71,6 @@ def rename(mapping : dict, raw: pd.DataFrame):
     raw = raw.rename(columns=norm_map)
     return raw
 
-
 '''stuff for parsing into payload'''
 def parse_numeric_from_string(v):
     if pd.isna(v):
