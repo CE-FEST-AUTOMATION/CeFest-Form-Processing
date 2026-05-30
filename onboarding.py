@@ -1,35 +1,24 @@
 import json
+import os
 import urllib.request
+from pathlib import Path
+from datetime import date, datetime
 import pandas as pd
 import numpy as np
 import re
-
-#endpoint for uploading 
-ENDPOINT = "https://inpro-participants-submit-3avzbu5vaa-as.a.run.app"
-
-#pathing to file on computer 
-path = "C:\\Users\\xuan2\\Downloads\\_CE Fest 2026 Participant Sign-up Form!(1-3).xlsx"
-
-
-'''testing purposes, just ignore'''
-fake_db = []
-
-def sim_upload(payload : dict):
-    fake_db.append(payload)
-'''delete away when actually use'''
+import openpyxl
+ 
 
 def main():
+    load_env_file()
+    endpoint , path = read_env()
     renamed_df = rename(mapping, pd.read_excel(path))
-    filtered = renamed_df[~(renamed_df['PDPA'] == 'I disagree')]
-    for _, row in filtered.iterrows():
+    for _, row in renamed_df.iterrows():
         payload = process_row(row)
-        #upload_data(payload) #REAL UPLOAD LINE, UNCOMMENT FOR ACTUAL USE
-        sim_upload(payload) # SIMULATED UPLOAD LINE, COMMENT AWAY WHEN ACTUAL USE
-        print (fake_db[0])
+        upload_data(endpoint, payload) #REAL UPLOAD LINE, UNCOMMENT FOR ACTUAL USE
 
 
-
-'''Stuff for renaming'''
+'''Stuff for renaming''' #<- CHANGE HERE based on different form
 mapping = {"Completion time":"created_at",
            "What is your Telegram Handle? (eg. @ilovecefest)\n": "tele_handle",
            "What is your full name?": "full_name",
@@ -42,6 +31,29 @@ mapping = {"Completion time":"created_at",
             "Third Choice ": "trail_third_choice",
             'Why did you select your chosen trails ? (EG: T1 because .....) ': "writeup",
             '2' : 'PDPA'}
+
+
+
+def load_env_file(env_path: str = ".env") -> None:
+    env_file = Path(env_path)
+    if not env_file.exists():
+        return
+    for line in env_file.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        os.environ.setdefault(key.strip(), value.strip().strip('"').strip("'"))
+
+def read_env():
+    endpoint = os.getenv("ENDPOINT") # endpoint for uploading
+    if not endpoint:
+        raise ValueError("ENDPOINT is not set. Add it to .env as ENDPOINT=...")
+    # path to Excel file on computer — read from .env via `EXCO_PATH`
+    path = os.getenv("EXCO_PATH")
+    if not path:
+        raise ValueError("EXCO_PATH is not set. Add it to .env as EXCO_PATH=C:\\path\\to\\file.xlsx")
+    return endpoint, path
 
 def normalize(s):
     s = '' if s is None else str(s)
@@ -83,8 +95,12 @@ def format_vals(init: dict) -> dict:
 def normalize_value(v):
     if pd.isna(v):
         return None
-    if isinstance(v, pd.Timestamp):
-        return v.to_pydatetime()
+    if isinstance(v, (datetime, date, pd.Timestamp)):
+        return v.isoformat()
+    if isinstance(v, str):
+        v = v.replace('\ufeff', '').replace('\u200b', '').replace('\xa0', ' ')
+        v = re.sub(r'\s+', ' ', v).strip()
+        return v
     if isinstance(v, (np.integer,)):
         return int(v)
     if isinstance(v, (np.floating,)):
@@ -117,10 +133,10 @@ def process_row(srs: pd.Series) -> dict:
 
 
 '''function for uploading'''
-def upload_data(payload : dict): #function to upload data onto firebase (DONT NEED TOUCH)
+def upload_data(endpt, payload : dict): #function to upload data onto firebase (DONT NEED TOUCH)
     data = json.dumps(payload).encode()
     req = urllib.request.Request(
-        ENDPOINT,
+        endpt,
         data=data,
         headers={"Content-Type": "application/json"},
         method="POST",
@@ -136,4 +152,3 @@ def upload_data(payload : dict): #function to upload data onto firebase (DONT NE
         print(f"Error: {body}")
 
 main()
-
