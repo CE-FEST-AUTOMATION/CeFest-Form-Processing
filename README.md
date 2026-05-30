@@ -1,10 +1,11 @@
 # CeFest Form Processing
 
-Small utility scripts for normalising form exports (Excel/CSV), converting rows to JSON payloads, and uploading them to an HTTP endpoint (e.g. Firebase).
+Utility scripts for normalising form exports (Excel/CSV), converting rows to JSON payloads, and uploading them to an HTTP endpoint (e.g. Firebase).
+- used as the entry point of uploading trail participant data before it is processed by the backend allocation scripts for CE Fest'26 
 
 **What this repo contains**
 - **Files:** [script.py](script.py), [onboarding.py](onboarding.py), [test.py](test.py), [workings.ipynb](workings.ipynb), [requirements.txt](requirements.txt)
-- **Purpose:** read a form export, rename columns via a `mapping` dict, normalise types/strings, and POST each row as JSON to an endpoint.
+- **Purpose:** read forms submissions exported as `.xlsx` or `.csv` file, rename columns via a `mapping` dict, normalise types/strings, and POST each row as JSON to an endpoint.
 
 Getting started
 - **Install dependencies:**
@@ -14,10 +15,9 @@ Getting started
   ```
 
 - **Create a `.env` file** in the project root with at least the endpoint and path variables:
-
   - `ENDPOINT` — HTTP endpoint to POST converted JSON to.
-  - `EXCEL_PATH` — path to the Excel file used by `script.py` and `test.py` (e.g. `C:\path\to\file.xlsx`).
-  - `EXCO_PATH` — path to the CSV file used by `onboarding.py` (e.g. `C:\path\to\file.csv`).
+  - `EXCEL_PATH` — path to the Excel file used by `script.py` and `test.py` (e.g. `C:\path\to\file.xlsx`) used to upload CE FEST'26 participants
+  - `EXCO_PATH` — path to the CSV file used by `onboarding.py`, (e.g. `C:\path\to\file.csv`) used for onboarding CE Fest'26 EXCOs
 
   Example `.env`:
 
@@ -53,9 +53,5 @@ Key points / customization
 - Upload: the `upload_data` function performs a POST with `Content-Type: application/json`. If you want to dry-run, replace or comment the call and use `sim_upload` (as in `test.py`).
 
 Development notes
-- The notebook `workings.ipynb` contains an exploratory version of the same logic and examples for inspecting a single row.
+- The notebook `workings.ipynb` contains my initial workings for tinkering with the different functions and troubleshooting before deriving the final iteration of the script
 - Dependencies are minimal: `pandas`, `numpy`, `openpyxl` (for Excel reading).
-
-If you want I can:
-- run the `test.py` flow with a sample file (if you provide one),
-- or open a PR that renames env keys to be consistent across scripts (e.g. use `EXCEL_PATH` everywhere).
