@@ -19,6 +19,8 @@ Getting started
   - `EXCEL_PATH` — path to the Excel file used by `script.py` and `test.py` (e.g. `C:\path\to\file.xlsx`) used to upload CE FEST'26 participants
   - `EXCO_PATH` — path to the CSV file used by `onboarding.py`, (e.g. `C:\path\to\file.csv`) used for onboarding CE Fest'26 EXCOs
 
+  Template: copy [`.env.example`](.env.example) to `.env` and edit the values.
+
   Example `.env`:
 
   ```text
