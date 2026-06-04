@@ -18,7 +18,6 @@ def main():
         payload = process_row(row)
         upload_data(endpoint, payload) #REAL UPLOAD LINE, UNCOMMENT FOR ACTUAL USE
 
-
 '''Stuff for renaming''' #<- CHANGE HERE based on different form
 mapping = {"Completion time":"created_at",
            "What is your Telegram Handle? (eg. @ilovecefest)\n": "tele_handle",
@@ -32,8 +31,6 @@ mapping = {"Completion time":"created_at",
             "Third Choice ": "trail_third_choice",
             'Why did you select your chosen trails ? (EG: T1 because .....) ': "writeup",
             '2' : 'PDPA'}
-
-
 
 def load_env_file(env_path: str = ".env") -> None:
     env_file = Path(env_path)
