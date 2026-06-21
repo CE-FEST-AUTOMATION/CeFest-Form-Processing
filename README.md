@@ -1,61 +1,125 @@
 # CeFest Form Processing
 
-Utility scripts for normalising form exports (Excel/CSV), converting rows to JSON payloads, and uploading them to an HTTP endpoint (e.g. Firebase).
-- used as the entry point of uploading trail participant data before it is processed by the backend allocation scripts for CE Fest'26 
+Utility scripts for normalising form exports, converting rows to JSON payloads, and uploading them to an HTTP endpoint such as Firebase.
 
-**What this repo contains**
-- **Files:** [script.py](script.py), [onboarding.py](onboarding.py), [test.py](test.py), [workings.ipynb](workings.ipynb), [requirements.txt](requirements.txt)
-- **Purpose:** read forms submissions exported as `.xlsx` or `.csv` file, rename columns via a `mapping` dict, normalise types/strings, and POST each row as JSON to an endpoint.
+This repo is used as the upload entry point for CE Fest participant data before the backend allocation scripts process it.
 
-Getting started
-- **Install dependencies:**
+**What This Repo Contains**
 
-  ```bash
-  pip install -r requirements.txt
-  ```
+- [script.py](script.py): uploads the current AY26/27 participant Excel export using [newmapping.json](newmapping.json).
+- [pastdata.py](pastdata.py): uploads older AY25/26 participant Excel data using [oldmapping.json](oldmapping.json).
+- [test.py](test.py): dry-run script that reads test Excel data, converts rows, and stores payloads in an in-memory `fake_db`.
+- [helpers.py](helpers.py): shared mapping, renaming, parsing, fallback, and upload helpers used by `script.py`, `pastdata.py`, and `test.py`.
+- [oldmapping.json](oldmapping.json): raw form headers mapped to payload keys for the older form format.
+- [newmapping.json](newmapping.json): raw form headers mapped to payload keys for the current form format.
+- [onboarding.py](onboarding.py): CSV onboarding flow for EXCO data. This still uses its own inline mapping.
+- [workings.ipynb](workings.ipynb): notebook scratchpad for earlier testing and troubleshooting.
+- [requirements.txt](requirements.txt): Python dependencies.
 
-- **Create a `.env` file** in the project root with at least the endpoint and path variables:
-  - `ENDPOINT` — HTTP endpoint to POST converted JSON to.
-  - `EXCEL_PATH` — path to the Excel file used by `script.py` and `test.py` (e.g. `C:\path\to\file.xlsx`) used to upload CE FEST'26 participants
-  - `EXCO_PATH` — path to the CSV file used by `onboarding.py`, (e.g. `C:\path\to\file.csv`) used for onboarding CE Fest'26 EXCOs
-  - ''
+**Getting Started**
 
-  Template: copy [`.env.example`](.env.example) to `.env` and edit the values.
+Install dependencies:
 
-  Example `.env`:
+```bash
+pip install -r requirements.txt
+```
 
-  ```text
-  ENDPOINT=https://your-firebase-endpoint.example/submit
-  EXCEL_PATH=C:\Users\you\Downloads\form_export.xlsx
-  PAST_PATH="C:\\path\\to\\file.xlsx"
-  EXCO_PATH=C:\Users\you\Downloads\form_export.csv
-  ```
+Create a `.env` file in the project root. You can copy [`.env.example`](.env.example) if present, or create one manually.
 
-Usage
-- Quick test (no network): run `test.py` — it reads `EXCEL_PATH`, converts rows, and appends payloads to an in-memory `fake_db` then prints them. This is the safest way to confirm mapping and payload shape.
+Required variables:
 
-  ```bash
-  python test.py
-  ```
+- `ENDPOINT`: HTTP endpoint to POST converted JSON payloads to.
+- `EXCEL_PATH`: Excel file used by `script.py` for current participant uploads.
+- `PAST_PATH`: Excel file used by `pastdata.py` for older participant uploads.
+- `TEST_PATH`: Excel file used by `test.py` for dry-run testing.
+- `EXCO_PATH`: CSV file used by `onboarding.py` for EXCO onboarding.
 
-- Upload mode (Excel): `script.py` reads `EXCEL_PATH`, filters out rows where PDPA column equals `I disagree`, converts rows and POSTs them to `ENDPOINT`.
+Example `.env`:
 
-  ```bash
-  python script.py
-  ```
+```text
+ENDPOINT=https://your-firebase-endpoint.example/submit
+EXCEL_PATH=C:\Users\you\Downloads\current_form_export.xlsx
+PAST_PATH=C:\Users\you\Downloads\past_form_export.xlsx
+TEST_PATH=C:\Users\you\Downloads\test_form_export.xlsx
+EXCO_PATH=C:\Users\you\Downloads\exco_form_export.csv
+```
 
-- CSV onboarding flow: `onboarding.py` reads `EXCO_PATH` (CSV) and posts each row to `ENDPOINT`.
+**Usage**
 
-  ```bash
-  python onboarding.py
-  ```
+Dry-run without network upload:
 
-Key points / customization
-- Column mapping: each script contains a `mapping` dict at the top mapping the raw form header (left) to the desired JSON key (right). Edit this to match your export headers.
-- PDPA filter: `script.py` and `test.py` filter out rows where normalized `PDPA` == `I disagree`. `onboarding.py` does not apply that filter — change as needed.
-- Date handling: the scripts convert `created_at` to ISO strings (or Python datetimes in some paths) and normalise numeric fields via `parse_numeric_from_string`.
-- Upload: the `upload_data` function performs a POST with `Content-Type: application/json`. If you want to dry-run, replace or comment the call and use `sim_upload` (as in `test.py`).
+```bash
+python test.py
+```
 
-Development notes
+`test.py` reads `TEST_PATH`, loads [oldmapping.json](oldmapping.json), converts rows, appends payloads to `fake_db`, and prints test output. Use this to confirm mapping and payload shape before uploading.
+
+Upload current participant data:
+
+```bash
+python script.py
+```
+
+`script.py` reads `EXCEL_PATH`, loads [newmapping.json](newmapping.json), filters out rows where `PDPA` equals `I disagree`, converts each row, and POSTs each payload to `ENDPOINT`.
+
+Upload past participant data:
+
+```bash
+python pastdata.py
+```
+
+`pastdata.py` reads `PAST_PATH`, loads [oldmapping.json](oldmapping.json), applies the same PDPA filter, converts each row, and POSTs each payload to `ENDPOINT`.
+
+Run the CSV onboarding flow:
+
+```bash
+python onboarding.py
+```
+
+`onboarding.py` reads `EXCO_PATH`, parses the CSV, and POSTs each row to `ENDPOINT`.
+
+**Mapping Format**
+
+Participant mappings now live in JSON files instead of Python dictionaries.
+
+Each mapping entry follows this format:
+
+```json
+{
+  "Raw form column header": "payload_key"
+}
+```
+
+For example:
+
+```json
+{
+  "What is your full name?": "full_name",
+  "First Choice": "trail_first_choice",
+  "2": "PDPA"
+}
+```
+
+To support a changed form, edit the left side to match the exported form column header. The right side should stay as the payload field name expected by the backend.
+
+Current mapping files:
+
+- [newmapping.json](newmapping.json): used by `script.py` for AY26/27 participant uploads.
+- [oldmapping.json](oldmapping.json): used by `pastdata.py` and `test.py` for AY25/26 or older-format participant uploads.
+
+The loader normalises whitespace in column headers before renaming, so small differences like extra spaces or newlines are usually handled.
+
+**Key Points**
+
+- PDPA filter: `script.py`, `pastdata.py`, and `test.py` filter out rows where `PDPA == "I disagree"`. `onboarding.py` does not apply that filter.
+- Fallback fields: [helpers.py](helpers.py) fills missing non-form fields with defaults: `role="Participant"`, `status="pending"`, `round=1`, and missing fourth/fifth trail choices as `None`.
+- Numeric parsing: `year` and trail choice fields are converted from strings like `T1` or `Year 2` into numbers where possible.
+- Date handling: `created_at` is converted to an ISO-formatted value before upload.
+- Upload: `helpers.upload_data()` sends JSON with `Content-Type: application/json`.
+
+**Development Notes**
+
 - The notebook `workings.ipynb` contains my initial workings for tinkering with the different functions and troubleshooting before deriving the final iteration of the script
-- Dependencies are minimal: `pandas`, `numpy`, `openpyxl` (for Excel reading).
+- Keep participant mapping changes in JSON where possible.
+- Put shared parsing or upload changes in [helpers.py](helpers.py), since `script.py`, `pastdata.py`, and `test.py` all use it.
+- Dependencies are minimal: `pandas`, `numpy`, and `openpyxl` for Excel reading.
