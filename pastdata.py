@@ -111,7 +111,7 @@ def normalize_value(v):
 
 def process_row(srs: pd.Series) -> dict:
     """Accepts a pandas Series (one row) and returns a JSON-serializable dict."""
-    cols = ['created_at','tele_handle', 'full_name', 'house', 'student_email', 'gender', 'year', 'status', 'role', 'trail_first_choice', 'trail_second_choice', 'trail_third_choice', 'writeup'] #edit col names according to the final one
+    cols = ['created_at','tele_handle', 'full_name', 'house', 'student_email', 'gender', 'year', 'status', 'round', 'role', 'trail_first_choice', 'trail_second_choice', 'trail_third_choice', 'writeup'] #edit col names according to the final one
     d = {}
     for col_name in cols:
         if col_name == 'created_at':
@@ -124,6 +124,9 @@ def process_row(srs: pd.Series) -> dict:
         elif col_name == 'status':
             val = srs.get('status')
             d['status'] = val if not pd.isna(val) else 'pending'
+        elif col_name == 'round':
+            val = srs.get('round')
+            d['round'] = val if not pd.isna(val) else 1
         else:
             d[col_name] = srs.get(col_name)
     d = format_vals(d)
