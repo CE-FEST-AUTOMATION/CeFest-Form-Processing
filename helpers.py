@@ -8,7 +8,6 @@ import pandas as pd
 import numpy as np
 import openpyxl
 
-
 fallback = {'role':'Participant', 
             'status' : 'pending', 
             'round' : 1 , 
@@ -75,7 +74,7 @@ def format_vals(init: dict) -> dict:
 def process_row(srs: pd.Series, mapping: dict) -> dict: #accepts a pandas Series (one row) and returns a JSON-serializable dict."""
     cols = mapping.values()
     non_form = fallback.keys()
-    d = {}
+    d = dict(fallback)
     for col_name in cols:
         if col_name == 'created_at':
             created_at = pd.to_datetime(srs.get('created_at'), errors='coerce')
@@ -91,6 +90,14 @@ def process_row(srs: pd.Series, mapping: dict) -> dict: #accepts a pandas Series
         d[k] = normalize_value(d[k])
     return d
 
+
+def missing_required_fields(payload: dict, required_fields: tuple[str, ...]) -> list[str]:
+    missing = []
+    for field in required_fields:
+        value = payload.get(field)
+        if value is None or value == "":
+            missing.append(field)
+    return missing
 
 
 def normalize_value(v):

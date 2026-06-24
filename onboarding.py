@@ -12,7 +12,7 @@ import openpyxl
 def main():
     load_env_file()
     endpoint , path = read_env()
-    renamed_df = rename(mapping, pd.read_csv(path)) # <- READS CSV FILE
+    renamed_df = rename(mapping, pd.read_(path)) # <- READS CSV FILE
     for _, row in renamed_df.iterrows():
         payload = process_row(row)
         upload_data(endpoint, payload) #REAL UPLOAD LINE, UNCOMMENT FOR ACTUAL USE

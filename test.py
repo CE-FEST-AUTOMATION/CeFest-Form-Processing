@@ -7,9 +7,19 @@ import helpers as h
 fake_db = []
 
 mapping_path = "oldmapping.json"
+required_fields = (
+    "round",
+    "trail_first_choice",
+    "trail_second_choice",
+    "trail_third_choice",
+)
 
 def sim_upload(payload : dict):
     fake_db.append(payload)
+
+def check_field(field:str):
+    for dict in fake_db:
+        print(dict[field])
 
 def main():
     h.load_env_file()
@@ -17,11 +27,16 @@ def main():
     mapping = h.load_mapping(mapping_path)
     renamed_df = h.rename(mapping, pd.read_excel(path))
     filtered = renamed_df[~(renamed_df['PDPA'] == 'I disagree')] 
-    for _, row in filtered.iterrows():
+    for index, row in filtered.iterrows():
         payload = h.process_row(row, mapping)
+        missing = h.missing_required_fields(payload, required_fields)
+        if missing:
+            name = payload.get("full_name") or f"Excel row {index + 2}"
+            print(f"Skipping {name}: missing required fields: {missing}")
+            continue
         sim_upload(payload)
-    for dict in fake_db:
-        print(dict['trail_fifth_choice'])
+    print(fake_db)
+    #check_field("")
 
 def read_env():
     endpoint = os.getenv("ENDPOINT") # endpoint for uploading
