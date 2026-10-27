@@ -116,6 +116,14 @@ The loader normalises whitespace in column headers before renaming, so small dif
 - Numeric parsing: `year` and trail choice fields are converted from strings like `T1` or `Year 2` into numbers where possible.
 - Date handling: `created_at` is converted to an ISO-formatted value before upload.
 - Upload: `helpers.upload_data()` sends JSON with `Content-Type: application/json`.
+- For subsequent rounds of signups, change the fallback value of 'round' in the fallback dictionary inside `helpers.py`
+```python
+fallback = {'role':'Participant', 
+            'status' : 'pending', 
+            'round' : 2 , #CHANGED FOR ROUND 2 
+            'trail_fourth_choice' : None, 
+            'trail_fifth_choice' : None}
+```
 
 **Development Notes**
 

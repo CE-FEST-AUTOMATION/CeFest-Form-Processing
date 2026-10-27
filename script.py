@@ -16,14 +16,19 @@ def main():
     mapping = h.load_mapping(mapping_path)
     renamed_df = h.rename(mapping, pd.read_excel(path))
     filtered = renamed_df[~(renamed_df['PDPA'] == 'I disagree')] 
+    failed_uploads = []
+    n_successful = 0
     for index, row in filtered.iterrows():
         payload = h.process_row(row, mapping)
         missing = h.missing_required_fields(payload, required_fields)
         if missing:
             name = payload.get("full_name") or f"Excel row {index + 2}"
+            failed_uploads.append(f"{payload.get("full_name")} ({payload.get("tele_handle")}) failed upload : missing required fields{missing}")
             print(f"Skipping {name}: missing required fields: {missing}")
             continue
-        h.upload_data(endpoint, payload) #REAL UPLOAD LINE, UNCOMMENT FOR ACTUAL USE
+        n_successful+=1
+        h.upload_data(endpoint, payload) #REAL UPLOAD LINE, UNCOMMENT FOR ACTUAL US
+    h.print_diagnostics(failed_uploads, n_successful)
 
 def read_env():
     endpoint = os.getenv("ENDPOINT") # endpoint for uploading

@@ -1,8 +1,8 @@
 {
   "Completion time": "created_at",
   "What is your Telegram Handle? (eg. @ilovecefest)": "tele_handle",
-  "What is your full name?": "full_name",
-  "Which House are you from?": "house",
+  "Name": "full_name",
+  "What house are you from ?": "house",
   "I am currently... (in AY26/27)": "year",
   "Email": "student_email",
   "What is your gender?": "gender",
@@ -11,6 +11,6 @@
   "Third Choice": "trail_third_choice",
   "Fourth Choice": "trail_fourth_choice",
   "Fifth Choice": "trail_fifth_choice",
-  "Why did you select your chosen trails ? (EG: T1 because .....)": "writeup",
+  "Why did you select your first three trail choices ? (e.g. trail 1 - ...., trail 2- ....)": "writeup",
   "2": "PDPA"
 }

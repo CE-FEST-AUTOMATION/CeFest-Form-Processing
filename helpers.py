@@ -10,7 +10,7 @@ import openpyxl
 
 fallback = {'role':'Participant', 
             'status' : 'pending', 
-            'round' : 1 , 
+            'round' : 2 , #CHANGED FOR ROUND 2 
             'trail_fourth_choice' : None, 
             'trail_fifth_choice' : None}
 
@@ -136,3 +136,11 @@ def upload_data(endpt, payload : dict): #function to upload data onto firebase (
         body = e.read().decode()
         print(f"Status: {e.code}")
         print(f"Error: {body}")
+
+
+def print_diagnostics(failed_uploads, n_successful):
+    print("\n=== Upload Summary ===")
+    print(f"Successful: {n_successful}")
+    print(f"Failed: {len(failed_uploads)}")
+    for row in failed_uploads:
+        print(row)

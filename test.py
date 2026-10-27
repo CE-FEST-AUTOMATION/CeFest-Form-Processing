@@ -43,9 +43,9 @@ def read_env():
     if not endpoint:
         raise ValueError("ENDPOINT is not set. Add it to .env as ENDPOINT=...")
     # path to Excel file on computer — read from .env via `EXCEL_PATH`
-    path = os.getenv("TEST_PATH")
+    path = os.getenv("EXCEL_PATH")
     if not path:
-        raise ValueError("TEST_PATH is not set. Add it to .env as TEST_PATH=C:\\path\\to\\file.xlsx")
+        raise ValueError("EXCEL_PATH is not set. Add it to .env as EXCEL_PATH=C:\\path\\to\\file.xlsx")
     return endpoint, path
 
 
